@@ -90,7 +90,7 @@ def invoice(id):
     return render_template("invoice.html", sale=sale, total=total, profit=profit)
 
 
-# ------------------ MAIN ------------------
+# ------------------ START ------------------
 
 if __name__ == "__main__":
     with app.app_context():
