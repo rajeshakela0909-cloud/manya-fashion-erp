@@ -1,69 +1,42 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
 
 app = Flask(__name__)
 
-# ---------------- DATABASE ---------------- #
-
-database_url = os.environ.get("DATABASE_URL")
-
-if database_url and database_url.startswith("postgres://"):
-    database_url = database_url.replace("postgres://", "postgresql://", 1)
-
-app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# ---------------- MODELS ---------------- #
+# ---------------- MODELS ----------------
 
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(50), unique=True, nullable=False)
-    name = db.Column(db.String(100), nullable=False)
-    cost_price = db.Column(db.Float, nullable=False)
-    sell_price = db.Column(db.Float, nullable=False)
-    quantity = db.Column(db.Integer, nullable=False)
-
-class Customer(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    mobile = db.Column(db.String(20))
-    address = db.Column(db.String(200))
+    code = db.Column(db.String(50))
+    name = db.Column(db.String(100))
+    cost_price = db.Column(db.Float)
+    sell_price = db.Column(db.Float)
+    quantity = db.Column(db.Integer)
 
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-    customer_id = db.Column(db.Integer, db.ForeignKey('customer.id'))
-    quantity = db.Column(db.Integer, nullable=False)
-    total_amount = db.Column(db.Float)
+    quantity = db.Column(db.Integer)
+    total = db.Column(db.Float)
     profit = db.Column(db.Float)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
     product = db.relationship('Product')
-    customer = db.relationship('Customer')
 
-# ---------------- HOME ---------------- #
+# ---------------- ROUTES ----------------
 
 @app.route("/")
 def home():
     products = Product.query.all()
-    customers = Customer.query.all()
     sales = Sale.query.order_by(Sale.date.desc()).all()
-
-    total_profit = sum(s.profit for s in sales) if sales else 0
-
-    return render_template(
-        "index.html",
-        products=products,
-        customers=customers,
-        sales=sales,
-        total_profit=total_profit
-    )
-
-# ---------------- PRODUCT ---------------- #
+    return render_template("dashboard.html", products=products, sales=sales)
 
 @app.route("/add_product", methods=["POST"])
 def add_product():
@@ -78,57 +51,50 @@ def add_product():
     db.session.commit()
     return redirect("/")
 
-@app.route("/delete_product/<int:id>")
-def delete_product(id):
-    product = Product.query.get_or_404(id)
-    db.session.delete(product)
-    db.session.commit()
-    return redirect("/")
-
-# ---------------- CUSTOMER ---------------- #
-
-@app.route("/add_customer", methods=["POST"])
-def add_customer():
-    customer = Customer(
-        name=request.form["name"],
-        mobile=request.form["mobile"],
-        address=request.form["address"]
-    )
-    db.session.add(customer)
-    db.session.commit()
-    return redirect("/")
-
-# ---------------- SALE ---------------- #
-
-@app.route("/add_sale", methods=["POST"])
-def add_sale():
-    product = Product.query.get(int(request.form["product_id"]))
-    customer = Customer.query.get(int(request.form["customer_id"]))
+@app.route("/sell", methods=["POST"])
+def sell():
+    product_id = int(request.form["product_id"])
     qty = int(request.form["quantity"])
 
-    if product and customer and product.quantity >= qty:
-        total = product.sell_price * qty
-        profit = (product.sell_price - product.cost_price) * qty
+    product = Product.query.get(product_id)
 
-        product.quantity -= qty
+    if not product or product.quantity < qty:
+        return redirect("/")
 
-        sale = Sale(
-            product=product,
-            customer=customer,
-            quantity=qty,
-            total_amount=total,
-            profit=profit
-        )
+    total = product.sell_price * qty
+    profit = (product.sell_price - product.cost_price) * qty
 
-        db.session.add(sale)
+    product.quantity -= qty
+
+    sale = Sale(
+        product_id=product.id,
+        quantity=qty,
+        total=total,
+        profit=profit
+    )
+
+    db.session.add(sale)
+    db.session.commit()
+
+    return redirect(url_for("invoice", sale_id=sale.id))
+
+@app.route("/invoice/<int:sale_id>")
+def invoice(sale_id):
+    sale = Sale.query.get(sale_id)
+    if not sale:
+        return redirect("/")
+    return render_template("invoice.html", sale=sale)
+
+@app.route("/delete/<int:id>")
+def delete_product(id):
+    product = Product.query.get(id)
+    if product:
+        db.session.delete(product)
         db.session.commit()
-
     return redirect("/")
-
-# ---------------- INIT ---------------- #
 
 with app.app_context():
     db.create_all()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
