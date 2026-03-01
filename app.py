@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
@@ -33,7 +33,11 @@ class Sale(db.Model):
 def home():
     return "Manya Fashion ERP Running Successfully 🚀"
 
-if __name__ == "__main__":
-    with app.app_context():
+# IMPORTANT: Railway ke liye
+with app.app_context():
+    try:
         db.create_all()
-    app.run()
+    except Exception as e:
+        print("Database error:", e)
+
+# Railway ko sirf app object chahiye
