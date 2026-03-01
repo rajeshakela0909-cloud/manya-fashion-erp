@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manya Fashion ERP</title>
+</head>
+<body>
+
+<h2>Add Product</h2>
+<form method="POST" action="/add">
+    Code: <input name="code" required><br><br>
+    Name: <input name="name" required><br><br>
+    Cost Price: <input name="cost_price" required><br><br>
+    Sell Price: <input name="sell_price" required><br><br>
+    Quantity: <input name="quantity" required><br><br>
+    <button type="submit">Add Product</button>
+</form>
+
+<hr>
+
+<h2>Product List</h2>
+<table border="1">
+<tr>
+    <th>Code</th>
+    <th>Name</th>
+    <th>Cost</th>
+    <th>Sell</th>
+    <th>Qty</th>
+    <th>Profit</th>
+</tr>
+
+{% for p in products %}
+<tr>
+    <td>{{ p.code }}</td>
+    <td>{{ p.name }}</td>
+    <td>{{ p.cost_price }}</td>
+    <td>{{ p.sell_price }}</td>
+    <td>{{ p.quantity }}</td>
+    <td>{{ p.sell_price - p.cost_price }}</td>
+</tr>
+{% endfor %}
+
+</table>
+
+</body>
+</html>
