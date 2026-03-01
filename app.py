@@ -8,7 +8,21 @@ conn = sqlite3.connect("shop.db", check_same_thread=False)
 cursor = conn.cursor()
 
 cursor.execute("CREATE TABLE IF NOT EXISTS products (code TEXT PRIMARY KEY, name TEXT, purchase REAL, selling REAL, stock INTEGER)")
-cursor.execute("CREATE TABLE IF NOT EXISTS sales (id INTEGER PRIMARY KEY AUTOINCREMENT, code TEXT, name TEXT, qty INTEGER, profit REAL, date TEXT, time TEXT)")
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS sales (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    bill_no TEXT,
+    code TEXT,
+    name TEXT,
+    qty INTEGER,
+    profit REAL,
+    total REAL,
+    customer TEXT,
+    mobile TEXT,
+    date TEXT,
+    time TEXT
+)
+""")
 conn.commit()
 
 @app.route("/")
@@ -91,3 +105,4 @@ import os
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
