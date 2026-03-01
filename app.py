@@ -21,6 +21,12 @@ class Product(db.Model):
     cost_price = db.Column(db.Float, nullable=False)
     sell_price = db.Column(db.Float, nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
+    @app.route("/delete/<int:id>")
+def delete_product(id):
+    product = Product.query.get(id)
+    db.session.delete(product)
+    db.session.commit()
+    return redirect("/")
 
 @app.route("/")
 def home():
@@ -42,3 +48,4 @@ def add_product():
 
 with app.app_context():
     db.create_all()
+
