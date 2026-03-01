@@ -6,78 +6,144 @@
 </head>
 <body class="bg-light">
 
-<div class="container mt-5">
+<div class="container mt-4">
 
     <div class="text-center mb-4">
         <h1 class="fw-bold">Manya Fashion ERP 🚀</h1>
-        <p class="text-muted">Inventory Management System</p>
+        <h5 class="text-success">Total Profit: ₹ {{ total_profit }}</h5>
     </div>
 
-    <!-- Add Product Card -->
-    <div class="card shadow p-4 mb-5">
-        <h4 class="mb-3">Add Product</h4>
-        <form method="POST" action="/add">
+    <!-- ADD PRODUCT -->
+    <div class="card p-4 mb-4 shadow">
+        <h4>Add Product</h4>
+        <form method="POST" action="/add_product">
             <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Code</label>
-                    <input name="code" class="form-control" required>
+                <div class="col-md-3 mb-2">
+                    <input name="code" placeholder="Code" class="form-control" required>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Name</label>
-                    <input name="name" class="form-control" required>
+                <div class="col-md-3 mb-2">
+                    <input name="name" placeholder="Name" class="form-control" required>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Cost Price</label>
-                    <input name="cost_price" type="number" step="0.01" class="form-control" required>
+                <div class="col-md-2 mb-2">
+                    <input name="cost_price" type="number" step="0.01" placeholder="Cost" class="form-control" required>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Sell Price</label>
-                    <input name="sell_price" type="number" step="0.01" class="form-control" required>
+                <div class="col-md-2 mb-2">
+                    <input name="sell_price" type="number" step="0.01" placeholder="Sell" class="form-control" required>
                 </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Quantity</label>
-                    <input name="quantity" type="number" class="form-control" required>
+                <div class="col-md-2 mb-2">
+                    <input name="quantity" type="number" placeholder="Qty" class="form-control" required>
                 </div>
             </div>
-            <button class="btn btn-primary">Add Product</button>
+            <button class="btn btn-primary mt-2">Add Product</button>
         </form>
     </div>
 
-    <!-- Product List -->
-    <div class="card shadow p-4">
-        <h4 class="mb-3">Product List</h4>
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>Code</th>
-                        <th>Name</th>
-                        <th>Cost</th>
-                        <th>Sell</th>
-                        <th>Qty</th>
-                        <th>Profit</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for p in products %}
-                    <tr>
-                        <td>{{ p.code }}</td>
-                        <td>{{ p.name }}</td>
-                        <td>{{ p.cost_price }}</td>
-                        <td>{{ p.sell_price }}</td>
-                        <td>{{ p.quantity }}</td>
-                        <td class="text-success fw-bold">
-                            {{ (p.sell_price - p.cost_price) * p.quantity }}
-                        </td>
-                        <td>
-                            <a href="/delete/{{p.id}}" class="btn btn-danger btn-sm">Delete</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+    <!-- ADD CUSTOMER -->
+    <div class="card p-4 mb-4 shadow">
+        <h4>Add Customer</h4>
+        <form method="POST" action="/add_customer">
+            <div class="row">
+                <div class="col-md-4 mb-2">
+                    <input name="name" placeholder="Customer Name" class="form-control" required>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <input name="mobile" placeholder="Mobile" class="form-control">
+                </div>
+                <div class="col-md-4 mb-2">
+                    <input name="address" placeholder="Address" class="form-control">
+                </div>
+            </div>
+            <button class="btn btn-success mt-2">Add Customer</button>
+        </form>
+    </div>
+
+    <!-- SALE ENTRY -->
+    <div class="card p-4 mb-4 shadow">
+        <h4>Sale Entry</h4>
+        <form method="POST" action="/add_sale">
+            <div class="row">
+                <div class="col-md-4 mb-2">
+                    <select name="product_id" class="form-select" required>
+                        <option value="">Select Product</option>
+                        {% for p in products %}
+                        <option value="{{ p.id }}">{{ p.name }} (Stock: {{ p.quantity }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <select name="customer_id" class="form-select" required>
+                        <option value="">Select Customer</option>
+                        {% for c in customers %}
+                        <option value="{{ c.id }}">{{ c.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <input name="quantity" type="number" placeholder="Quantity" class="form-control" required>
+                </div>
+            </div>
+            <button class="btn btn-warning mt-2">Add Sale</button>
+        </form>
+    </div>
+
+    <!-- PRODUCT TABLE -->
+    <div class="card p-4 mb-4 shadow">
+        <h4>Product List</h4>
+        <table class="table table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Stock</th>
+                    <th>Cost</th>
+                    <th>Sell</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in products %}
+                <tr>
+                    <td>{{ p.code }}</td>
+                    <td>{{ p.name }}</td>
+                    <td>{{ p.quantity }}</td>
+                    <td>{{ p.cost_price }}</td>
+                    <td>{{ p.sell_price }}</td>
+                    <td>
+                        <a href="/delete_product/{{p.id}}" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- SALES HISTORY -->
+    <div class="card p-4 shadow">
+        <h4>Sales History</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Product</th>
+                    <th>Customer</th>
+                    <th>Qty</th>
+                    <th>Total</th>
+                    <th>Profit</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in sales %}
+                <tr>
+                    <td>{{ s.date.strftime('%d-%m-%Y %H:%M') }}</td>
+                    <td>{{ s.product.name }}</td>
+                    <td>{{ s.customer.name }}</td>
+                    <td>{{ s.quantity }}</td>
+                    <td>{{ s.total_amount }}</td>
+                    <td class="text-success">{{ s.profit }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 
 </div>
