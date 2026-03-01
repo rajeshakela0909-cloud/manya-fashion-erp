@@ -45,10 +45,16 @@ class Sale(db.Model):
     product = db.relationship('Product')
     customer = db.relationship('Customer')
 
-# ---------------- HOME ---------------- #
+# ---------------- HOME REDIRECT ---------------- #
 
 @app.route("/")
 def home():
+    return redirect("/dashboard")
+
+# ---------------- DASHBOARD ---------------- #
+
+@app.route("/dashboard")
+def dashboard():
     products = Product.query.all()
     customers = Customer.query.all()
     sales = Sale.query.order_by(Sale.date.desc()).all()
@@ -76,14 +82,14 @@ def add_product():
     )
     db.session.add(product)
     db.session.commit()
-    return redirect("/")
+    return redirect("/dashboard")
 
 @app.route("/delete_product/<int:id>")
 def delete_product(id):
     product = Product.query.get_or_404(id)
     db.session.delete(product)
     db.session.commit()
-    return redirect("/")
+    return redirect("/dashboard")
 
 # ---------------- CUSTOMER ---------------- #
 
@@ -96,7 +102,7 @@ def add_customer():
     )
     db.session.add(customer)
     db.session.commit()
-    return redirect("/")
+    return redirect("/dashboard")
 
 # ---------------- SALE ---------------- #
 
@@ -125,16 +131,15 @@ def add_sale():
 
         return redirect(f"/invoice/{sale.id}")
 
-    return redirect("/")
+    return redirect("/dashboard")
 
 # ---------------- INVOICE ---------------- #
 
 @app.route("/invoice/<int:id>")
 def invoice(id):
     sale = Sale.query.get(id)
-
     if not sale:
-        return redirect("/")
+        return redirect("/dashboard")
 
     return render_template("invoice.html", sale=sale)
 
@@ -142,8 +147,6 @@ def invoice(id):
 
 with app.app_context():
     db.create_all()
-
-# ---------------- RUN ---------------- #
 
 if __name__ == "__main__":
     app.run(debug=True)
