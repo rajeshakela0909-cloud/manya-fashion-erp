@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Invoice</title>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Invoice</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
 
 <div class="container mt-5">
+    <div class="card p-4 shadow">
+        <h2 class="text-center">Manya Fashion ERP</h2>
+        <hr>
 
-<div class="card p-4">
-<h3 class="text-center">Manya Fashion ERP</h3>
-<hr>
+        <p><strong>Date:</strong> {{ sale.date.strftime("%d-%m-%Y %H:%M") }}</p>
+        <p><strong>Customer:</strong> {{ sale.customer.name }}</p>
+        <p><strong>Mobile:</strong> {{ sale.customer.mobile }}</p>
 
-<p><strong>Date:</strong> {{ sale.date.strftime("%d-%m-%Y %H:%M") }}</p>
-<p><strong>Product:</strong> {{ sale.product.name }}</p>
-<p><strong>Quantity:</strong> {{ sale.quantity }}</p>
-<p><strong>Total:</strong> ₹{{ sale.total }}</p>
-<p><strong>Profit:</strong> ₹{{ sale.profit }}</p>
+        <hr>
 
-<button onclick="window.print()" class="btn btn-primary mt-3">Print</button>
-<a href="/" class="btn btn-secondary mt-3">Back</a>
+        <p><strong>Product:</strong> {{ sale.product.name }}</p>
+        <p><strong>Quantity:</strong> {{ sale.quantity }}</p>
+        <p><strong>Rate:</strong> ₹{{ sale.product.sell }}</p>
 
+        <hr>
+
+        <h5>Total: ₹{{ total }}</h5>
+        <h6>Profit: ₹{{ profit }}</h6>
+
+        <button onclick="window.print()" class="btn btn-primary mt-3">Print</button>
+        <a href="/" class="btn btn-secondary mt-3">Back</a>
+    </div>
 </div>
 
-</div>
 </body>
 </html>
