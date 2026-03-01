@@ -1,22 +1,22 @@
 from flask import Flask, request, redirect
-import sqlite3
-from datetime import datetime
+import os
+import psycopg2
 
-app = Flask(__name__)
-
-conn = sqlite3.connect("shop.db", check_same_thread=False)
+DATABASE_URL = os.environ.get("DATABASE_URL")
+conn = psycopg2.connect(DATABASE_URL)
 cursor = conn.cursor()
 
-cursor.execute("CREATE TABLE IF NOT EXISTS products (code TEXT PRIMARY KEY, name TEXT, purchase REAL, selling REAL, stock INTEGER)")
+cursor.execute("CREATE TABLE IF NOT EXISTS products (code TEXT PRIMARY KEY, name TEXT, purchase DOUBLE PRECISION,
+selling DOUBLE PRECISION, stock INTEGER)")
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS sales (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    id SERIAL PRIMARY KEY,
     bill_no TEXT,
     code TEXT,
     name TEXT,
     qty INTEGER,
-    profit REAL,
-    total REAL,
+    profit DOUBLE PRECISION,
+    total DOUBLE PRECISION,
     customer TEXT,
     mobile TEXT,
     date TEXT,
@@ -105,4 +105,5 @@ import os
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
