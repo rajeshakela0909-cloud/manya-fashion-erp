@@ -1,46 +1,39 @@
-from flask import Flask, request, redirect
-import os
-import psycopg2
+from flask import Flask, render_template, request, redirect
+from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
+import os
 
 app = Flask(__name__)
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
-conn = psycopg2.connect(DATABASE_URL)
-cursor = conn.cursor()
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Create Tables
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS products (
-    code TEXT PRIMARY KEY,
-    name TEXT,
-    purchase DOUBLE PRECISION,
-    selling DOUBLE PRECISION,
-    stock INTEGER
-);
-""")
+db = SQLAlchemy(app)
 
-cursor.execute("""
-CREATE TABLE IF NOT EXISTS sales (
-    id SERIAL PRIMARY KEY,
-    bill_no TEXT,
-    code TEXT,
-    name TEXT,
-    qty INTEGER,
-    profit DOUBLE PRECISION,
-    total DOUBLE PRECISION,
-    customer TEXT,
-    mobile TEXT,
-    date TEXT,
-    time TEXT
-);
-""")
+# Product Table
+class Product(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), unique=True, nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    cost_price = db.Column(db.Float, nullable=False)
+    sell_price = db.Column(db.Float, nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
 
-conn.commit()
+# Sales Table
+class Sale(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_code = db.Column(db.String(50))
+    customer_name = db.Column(db.String(100))
+    quantity_sold = db.Column(db.Integer)
+    total_price = db.Column(db.Float)
+    profit = db.Column(db.Float)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
 
 @app.route("/")
 def home():
     return "Manya Fashion ERP Running Successfully 🚀"
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+    with app.app_context():
+        db.create_all()
+    app.run()
