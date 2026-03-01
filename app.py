@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, abort
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
@@ -78,7 +78,7 @@ def add_product():
 
 @app.route("/delete_product/<int:id>")
 def delete_product(id):
-    product = Product.query.get(id)
+    product = Product.query.get_or_404(id)
     db.session.delete(product)
     db.session.commit()
     return redirect("/")
@@ -121,6 +121,8 @@ def add_sale():
         db.session.add(sale)
         db.session.commit()
 
+        return redirect(f"/invoice/{sale.id}")
+
     return redirect("/")
 
 # -------- INVOICE -------- #
@@ -128,6 +130,13 @@ def add_sale():
 @app.route("/invoice/<int:id>")
 def invoice(id):
     sale = Sale.query.get(id)
+
+    if not sale:
+        # Agar ID galat hai to latest sale dikha do
+        sale = Sale.query.order_by(Sale.date.desc()).first()
+        if not sale:
+            return "No Sales Found"
+
     return render_template("invoice.html", sale=sale)
 
 # ---------------- INIT DATABASE ---------------- #
