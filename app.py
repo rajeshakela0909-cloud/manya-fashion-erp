@@ -16,7 +16,14 @@ CREATE TABLE IF NOT EXISTS products (
     purchase REAL,
     selling REAL,
     stock INTEGER
-)
+    cursor.execute("""
+CREATE TABLE IF NOT EXISTS products (
+    code TEXT PRIMARY KEY,
+    name TEXT,
+    purchase REAL,
+    selling REAL,
+    stock INTEGER
+);
 """)
 
 cursor.execute("""
@@ -32,7 +39,7 @@ CREATE TABLE IF NOT EXISTS sales (
     mobile TEXT,
     date TEXT,
     time TEXT
-)
+);
 """)
 
 conn.commit()
@@ -118,6 +125,7 @@ import os
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
 
 
 
