@@ -86,7 +86,7 @@
         </form>
     </div>
 
-    <!-- PRODUCT TABLE -->
+    <!-- PRODUCT LIST -->
     <div class="card p-4 mb-4 shadow">
         <h4>Product List</h4>
         <table class="table table-bordered">
@@ -121,7 +121,7 @@
     <div class="card p-4 shadow">
         <h4>Sales History</h4>
         <table class="table table-striped">
-            <thead>
+            <thead class="table-dark">
                 <tr>
                     <th>Date</th>
                     <th>Product</th>
@@ -129,6 +129,7 @@
                     <th>Qty</th>
                     <th>Total</th>
                     <th>Profit</th>
+                    <th>Print</th>
                 </tr>
             </thead>
             <tbody>
@@ -140,6 +141,9 @@
                     <td>{{ s.quantity }}</td>
                     <td>{{ s.total_amount }}</td>
                     <td class="text-success">{{ s.profit }}</td>
+                    <td>
+                        <a href="/invoice/{{s.id}}" class="btn btn-primary btn-sm">Print</a>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
