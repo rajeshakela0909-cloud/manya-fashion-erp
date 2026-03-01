@@ -5,8 +5,9 @@ import os
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# DATABASE CONFIG (Railway ke liye)
+app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
 
@@ -22,13 +23,13 @@ class Product(db.Model):
 
 class Sale(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    product_id = db.Column(db.Integer, db.ForeignKey("product.id"))
     quantity = db.Column(db.Integer)
     total = db.Column(db.Float)
     profit = db.Column(db.Float)
     date = db.Column(db.DateTime, default=datetime.utcnow)
 
-    product = db.relationship('Product')
+    product = db.relationship("Product")
 
 # ---------------- ROUTES ----------------
 
@@ -45,7 +46,7 @@ def add_product():
         name=request.form["name"],
         cost_price=float(request.form["cost_price"]),
         sell_price=float(request.form["sell_price"]),
-        quantity=int(request.form["quantity"])
+        quantity=int(request.form["quantity"]),
     )
     db.session.add(product)
     db.session.commit()
@@ -58,7 +59,10 @@ def sell():
 
     product = Product.query.get(product_id)
 
-    if not product or product.quantity < qty:
+    if not product:
+        return redirect("/")
+
+    if product.quantity < qty:
         return redirect("/")
 
     total = product.sell_price * qty
@@ -70,7 +74,7 @@ def sell():
         product_id=product.id,
         quantity=qty,
         total=total,
-        profit=profit
+        profit=profit,
     )
 
     db.session.add(sale)
@@ -92,6 +96,8 @@ def delete_product(id):
         db.session.delete(product)
         db.session.commit()
     return redirect("/")
+
+# ---------------- CREATE TABLES ----------------
 
 with app.app_context():
     db.create_all()
