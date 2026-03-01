@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, abort
+from flask import Flask, render_template, request, redirect
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 import os
@@ -45,7 +45,7 @@ class Sale(db.Model):
     product = db.relationship('Product')
     customer = db.relationship('Customer')
 
-# ---------------- ROUTES ---------------- #
+# ---------------- HOME ---------------- #
 
 @app.route("/")
 def home():
@@ -55,13 +55,15 @@ def home():
 
     total_profit = sum(s.profit for s in sales) if sales else 0
 
-    return render_template("index.html",
-                           products=products,
-                           customers=customers,
-                           sales=sales,
-                           total_profit=total_profit)
+    return render_template(
+        "index.html",
+        products=products,
+        customers=customers,
+        sales=sales,
+        total_profit=total_profit
+    )
 
-# -------- PRODUCT -------- #
+# ---------------- PRODUCT ---------------- #
 
 @app.route("/add_product", methods=["POST"])
 def add_product():
@@ -83,7 +85,7 @@ def delete_product(id):
     db.session.commit()
     return redirect("/")
 
-# -------- CUSTOMER -------- #
+# ---------------- CUSTOMER ---------------- #
 
 @app.route("/add_customer", methods=["POST"])
 def add_customer():
@@ -96,7 +98,7 @@ def add_customer():
     db.session.commit()
     return redirect("/")
 
-# -------- SALE -------- #
+# ---------------- SALE ---------------- #
 
 @app.route("/add_sale", methods=["POST"])
 def add_sale():
@@ -125,21 +127,18 @@ def add_sale():
 
     return redirect("/")
 
-# -------- INVOICE -------- #
+# ---------------- INVOICE ---------------- #
 
 @app.route("/invoice/<int:id>")
 def invoice(id):
     sale = Sale.query.get(id)
 
     if not sale:
-        # Agar ID galat hai to latest sale dikha do
-        sale = Sale.query.order_by(Sale.date.desc()).first()
-        if not sale:
-            return "No Sales Found"
+        return redirect("/")
 
     return render_template("invoice.html", sale=sale)
 
-# ---------------- INIT DATABASE ---------------- #
+# ---------------- INIT ---------------- #
 
 with app.app_context():
     db.create_all()
